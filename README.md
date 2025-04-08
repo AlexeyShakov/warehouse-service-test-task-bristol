@@ -10,7 +10,7 @@
 Склонируйте проект, выполните задачу и пришлите ссылку на репозиторий.
 
 ## Задание
-Вам предстоит разработать микросервис на языке Python, предназначенный для обработки сообщений от складов, которые уведомляют о приемках и отправках товаров. 
+Вам предстоит разработать микросервис на языке Python, предназначенный для обработки сообщений от складов, которые уведомляют о приемках и отправках товаров.
 Микросервис будет сохранять данные о перемещениях и предоставлять API для получения информации о конкретных перемещениях и текущих состояниях складов.
 
 ### Основные задачи
@@ -29,7 +29,7 @@
     "id": "b3b53031-e83a-4654-87f5-b6b6fb09fd99", // id сообщения
     "source": "WH-3423", // источник отправки. формат - WH-****
     "specversion": "1.0",
-    "type": "ru.retail.warehouses.movement", 
+    "type": "ru.retail.warehouses.movement",
     "datacontenttype": "application/json",
     "dataschema": "ru.retail.warehouses.movement.v1.0",
     "time": 1737439421623,
@@ -48,10 +48,10 @@
 ###### Отбытие
 ```json
 {
-    "id": "b3b53031-e83a-4654-87f5-b6b6fb09fd99", 
+    "id": "b3b53031-e83a-4654-87f5-b6b6fb09fd99",
     "source": "WH-3322",
     "specversion": "1.0",
-    "type": "ru.retail.warehouses.movement", 
+    "type": "ru.retail.warehouses.movement",
     "datacontenttype": "application/json",
     "dataschema": "ru.retail.warehouses.movement.v1.0",
     "time": 1737439421623,
@@ -91,4 +91,3 @@
 - **URL:** `/api/warehouses/<warehouse_id>/products/<product_id>`
 - **Метод:** GET
 - **Описание:** Возвращает информацию текущем запасе товара в конкретном складе.
-

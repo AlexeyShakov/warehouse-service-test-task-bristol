@@ -1,0 +1,23 @@
+services:
+  warehouse_state_db:
+    container_name: warehouse_state_db
+    image: mongo:6.0
+    restart: on-failure
+    ports:
+      - "${DB_PORT}:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    mem_limit: 512m  # Чисто для примера, нужно подстраивать под нужды
+    cpus: 0.7        # Чисто для примера, нужно подстраивать под нужды
+
+volumes:
+  mongo_data:
