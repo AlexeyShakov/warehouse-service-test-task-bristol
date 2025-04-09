@@ -14,3 +14,7 @@ class MovementDiffInfoToJSON(BaseModel):
     source: Optional[str] = None
     destination: Optional[str] = None
     timestamp_diff: Optional[TimestampDiffSchema] = None
+
+
+class ProductQuantityToJSON(BaseModel):
+    quantity: int

@@ -6,25 +6,21 @@ class MongoRepo(interfaces.IWarehouseMonitorRepo):
     def __init__(self, collection: AsyncIOMotorCollection):
         self._collection = collection
 
-    async def get_movement_info_by_id(
+    async def get_movement_info(
         self,
-        movement_id: str,
-        needed_fields: type_hints.MOVEMENT_NEEDED_FIELDS = None,
+        needed_fields: type_hints.NEEDED_FIELDS = None,
         order_by: type_hints.ORDER_BY = None,
+        filtering_data: type_hints.FILTERING_DATA = None,
     ) -> list[models.MovementObj]:
-        query = {"data.movement_id": movement_id}
+        query = filtering_data or {}
 
-        if needed_fields:
-            cursor = self._collection.find(query, projection=needed_fields)
-        else:
-            cursor = self._collection.find(query)
+        cursor = self._collection.find(query, projection=needed_fields or None)
 
         if order_by:
             cursor = cursor.sort(order_by)
 
         results: type_hints.MONGO_MOVEMENT_LIST = await cursor.to_list(length=None)
-        result = await self._deserialize_movement_data_objs(results)
-        return result
+        return await self._deserialize_movement_data_objs(results)
 
     async def _deserialize_movement_data_objs(
         self, movement_docs: type_hints.MONGO_MOVEMENT_LIST
@@ -42,3 +38,22 @@ class MongoRepo(interfaces.IWarehouseMonitorRepo):
             )
             movements.append(movement)
         return movements
+
+    async def get_remaining_product_info(
+        self,
+        filtering_data: dict[str, str],
+        needed_fields: type_hints.NEEDED_FIELDS = None,
+    ) -> list[models.RemainingProduct]:
+        query = filtering_data or {}
+
+        cursor = self._collection.find(query, projection=needed_fields or None)
+
+        results: type_hints.REMAINING_PRODUCT_FROM_MONGO_LIST = await cursor.to_list(
+            length=None
+        )
+        return await self._deserialize_remaining_products(results)
+
+    async def _deserialize_remaining_products(
+        self, remaining_products: type_hints.REMAINING_PRODUCT_FROM_MONGO_LIST
+    ) -> list[models.RemainingProduct]:
+        return [models.RemainingProduct(**product) for product in remaining_products]

@@ -12,14 +12,14 @@ class WarehouseMonitorService:
     def __init__(self, repo: interfaces.IWarehouseMonitorRepo) -> None:
         self._repo = repo
 
-    async def get_movement_info_by_id(
+    async def get_movement_info(
         self,
         movement_id,
-        needed_fields: type_hints.MOVEMENT_NEEDED_FIELDS = None,
+        needed_fields: type_hints.NEEDED_FIELDS = None,
         order_by: type_hints.ORDER_BY = None,
     ) -> models.MovementDiffInfo:
-        movements = await self._repo.get_movement_info_by_id(
-            movement_id, needed_fields, order_by
+        movements = await self._repo.get_movement_info(
+            needed_fields, order_by, filtering_data={"data.movement_id": movement_id}
         )
         if not movements:
             raise exceptions.MovementNotFound(movement_id)
@@ -69,6 +69,25 @@ class WarehouseMonitorService:
             destination=None,
             timestamp_diff=None,
         )
+
+    async def get_remaining_product_quantity(
+        self,
+        warehouse_id: str,
+        product_id: str,
+        needed_fields: type_hints.NEEDED_FIELDS = None,
+    ) -> int:
+        # TODO надо проверить, что такие warehouse_id и product_id существуют
+        filtering_data = {"warehouse_id": warehouse_id, "data.product_id": product_id}
+        remaining_product_info = await self._repo.get_remaining_product_info(
+            filtering_data, needed_fields
+        )
+        remaining_quantity = 0
+        for product in remaining_product_info:
+            if product.event == "arrival":
+                remaining_quantity += product.quantity
+            else:
+                remaining_quantity -= product.quantity
+        return remaining_quantity
 
 
 async def get_service(

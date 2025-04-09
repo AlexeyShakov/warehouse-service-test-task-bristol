@@ -4,10 +4,17 @@ from src import models, type_hints
 
 class IWarehouseMonitorRepo(ABC):
     @abstractmethod
-    async def get_movement_info_by_id(
+    async def get_movement_info(
         self,
-        movement_id: str,
-        needed_fields: type_hints.MOVEMENT_NEEDED_FIELDS = None,
+        needed_fields: type_hints.NEEDED_FIELDS = None,
         order_by: type_hints.ORDER_BY = None,
+        filtering_data: type_hints.FILTERING_DATA = None,
     ) -> list[models.MovementObj]:
+        raise NotImplementedError()
+
+    async def get_remaining_product_info(
+        self,
+        filtering_data: dict[str, str],
+        needed_fields: type_hints.NEEDED_FIELDS = None,
+    ) -> list[models.RemainingProduct]:
         raise NotImplementedError()
