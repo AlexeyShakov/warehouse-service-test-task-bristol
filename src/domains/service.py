@@ -168,8 +168,9 @@ class WarehouseMonitorService:
         if remaining_quantity - quantity < 0:
             # Наверное, нужно посылать какое-то уведомление, если мы пытаемся взять больше товара чем нужно
             raise exceptions.ProductMovementValidationError(
-                f"You are trying to send more product with id '{product_id}' from the warehouse with id '{warehouse_id}'\
-                than there are.The current balance is {remaining_quantity}. Message id '{message_id}'"
+                exceptions.exceeded_product_quantity_to_take_err_msg(
+                    product_id, warehouse_id, remaining_quantity, message_id
+                )
             )
 
     async def _validate_current_movement_if_exists_else(
@@ -183,11 +184,11 @@ class WarehouseMonitorService:
             return
         if len(existing_movements) == 2:
             raise exceptions.ProductMovementValidationError(
-                f"There are already two messages with the same movement. This message with id '{message_id}' is redundant."
+                exceptions.amount_of_movement_reached_err_msg(message_id)
             )
         if existing_movements[0].event == current_movement_event:
             raise exceptions.ProductMovementValidationError(
-                f"Trying to add movement with event that already exists. The message id '{message_id}'"
+                exceptions.movement_with_same_event_err_msg.format(message_id)
             )
         existing_ts = existing_movements[0].timestamp
         if existing_ts.tzinfo is None:
@@ -197,7 +198,9 @@ class WarehouseMonitorService:
             and current_movement_timestamp <= existing_ts
         ):
             raise exceptions.ProductMovementValidationError(
-                f"Arrival time must be greater than departure time. The message id '{message_id}'"
+                exceptions.arrival_time_is_less_than_departure_err_msg.format(
+                    message_id
+                )
             )
 
 

@@ -1,8 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
 from motor.motor_asyncio import AsyncIOMotorCollection
+from pydantic import BaseModel
 
 from dataclasses import asdict
 
+from src.infrastructure import logger
 from src.serializers import to_json
 from src.infrastructure.mongo.connection import get_events_collection
 from src.domains import (
@@ -13,10 +15,18 @@ from src.domains import (
 movements_routes = APIRouter(prefix="/movements", tags=["Movements"])
 
 
+class ErrorResponse(BaseModel):
+    detail: str
+
+
 @movements_routes.get(
     "/{movement_id}",
     response_model=to_json.MovementDiffInfoToJSON,
     description="Возвращает информацию о перемещении по его ID",
+    responses={
+        404: {"model": ErrorResponse, "description": "Movement not found"},
+        500: {"model": ErrorResponse, "description": "Unknown server error"},
+    },
 )
 async def get_movement_info(
     movement_id: str,
@@ -41,7 +51,7 @@ async def get_movement_info(
         )
     except domain_exceptions.MovementNotFound as e:
         raise HTTPException(status_code=404, detail=str(e))
-    except Exception:
-        # TODO добавить логгер
-        raise HTTPException(status_code=500, detail="Unknown error")
+    except Exception as e:
+        logger.LOGGER.exception(e)
+        raise HTTPException(status_code=500, detail="Unknown server error")
     return to_json.MovementDiffInfoToJSON(**asdict(movement_info))
