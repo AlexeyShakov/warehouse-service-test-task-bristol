@@ -11,7 +11,7 @@ services:
     volumes:
       - mongo_data:/data/db
     healthcheck:
-      test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
+      test: [ "CMD", "mongo", "--eval", "db.adminCommand('ping')" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -19,5 +19,32 @@ services:
     mem_limit: 512m  # Чисто для примера, нужно подстраивать под нужды
     cpus: 0.7        # Чисто для примера, нужно подстраивать под нужды
 
+  kafka:
+    container_name: kafka
+    image: confluentinc/cp-kafka:7.5.0
+    restart: on-failure
+    ports:
+      - "9092:9092"
+    environment:
+      CLUSTER_ID: ${CLUSTER_ID}
+      KAFKA_CLUSTER_ID: ${CLUSTER_ID}
+      KAFKA_KRAFT_BROKER_ID: 1
+    env_file:
+      - .env
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+      - ./kafka_settings/scripts:/scripts
+      - ./kafka_settings/kraft.properties:/etc/kafka/kraft.properties
+    entrypoint: [ "bash", "-c", "/scripts/kafka-init.sh && kafka-server-start /etc/kafka/kraft.properties" ]
+    healthcheck:
+      test: [ "CMD-SHELL", "nc -z localhost 9092" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    mem_limit: 1g
+    cpus: 1.0
+
 volumes:
   mongo_data:
+  kafka_data:
