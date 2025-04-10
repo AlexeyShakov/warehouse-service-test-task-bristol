@@ -19,6 +19,9 @@ class WarehouseMonitorService:
         needed_fields: type_hints.NEEDED_FIELDS = None,
         order_by: type_hints.ORDER_BY = None,
     ) -> models.MovementDiffInfo:
+        # TODO в данном словаре мы опираемся на реализацию Mongo, что неправильно для слоя сервиса.
+        # По-хорошему здесь должны быть универсальная структура, а вот на уровне репозитория, она бы подстраивалась под БД
+        # Переделать, если хватит времени
         movements = await self._repo.get_movement_info(
             needed_fields, order_by, filtering_data={"data.movement_id": movement_id}
         )
@@ -77,7 +80,9 @@ class WarehouseMonitorService:
         product_id: str,
         needed_fields: type_hints.NEEDED_FIELDS = None,
     ) -> int:
-        # TODO надо проверить, что такие warehouse_id и product_id существуют
+        # TODO в данном словаре мы опираемся на реализацию Mongo, что неправильно для слоя сервиса.
+        # По-хорошему здесь должны быть универсальная структура, а вот на уровне репозитория, она бы подстраивалась под БД
+        # Переделать, если хватит времени
         filtering_data = {
             "data.warehouse_id": warehouse_id,
             "data.product_id": product_id,
@@ -85,6 +90,8 @@ class WarehouseMonitorService:
         remaining_product_info = await self._repo.get_remaining_product_info(
             filtering_data, needed_fields
         )
+        if not remaining_product_info:
+            raise exceptions.WarehouseOrProductNotFound(warehouse_id, product_id)
         remaining_quantity = 0
         for product in remaining_product_info:
             if product.event == "arrival":
