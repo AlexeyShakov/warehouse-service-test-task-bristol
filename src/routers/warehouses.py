@@ -19,7 +19,7 @@ async def get_product_info(
     events_collection: AsyncIOMotorCollection = Depends(get_events_collection),
 ):
     service = await warehouse_monitor_service.get_service(events_collection)
-    needed_fields = {"data.quantity": 1, "event": 1}
+    needed_fields = {"data.quantity": 1, "data.event": 1}
     remaining_product_quantity = await service.get_remaining_product_quantity(
         warehouse_id, product_id, needed_fields
     )

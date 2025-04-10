@@ -23,9 +23,14 @@ ORDER_BY = Optional[Sequence[tuple[str, int]]]
 FILTERING_DATA = Optional[dict[str, Any]]
 
 
-class RemainingProductFromMongo(TypedDict):
-    event: Literal["departure", "arrival"]
+class PartialMovementData(TypedDict):
+    event: Literal["arrival", "departure"]
     quantity: int
 
 
-REMAINING_PRODUCT_FROM_MONGO_LIST = list[RemainingProductFromMongo]
+class RemainingProductDoc(TypedDict):
+    _id: ObjectId
+    data: PartialMovementData
+
+
+REMAINING_PRODUCT_FROM_MONGO_LIST = list[RemainingProductDoc]

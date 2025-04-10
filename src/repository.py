@@ -56,4 +56,9 @@ class MongoRepo(interfaces.IWarehouseMonitorRepo):
     async def _deserialize_remaining_products(
         self, remaining_products: type_hints.REMAINING_PRODUCT_FROM_MONGO_LIST
     ) -> list[models.RemainingProduct]:
-        return [models.RemainingProduct(**product) for product in remaining_products]
+        return [
+            models.RemainingProduct(
+                product["data"]["event"], product["data"]["quantity"]
+            )
+            for product in remaining_products
+        ]

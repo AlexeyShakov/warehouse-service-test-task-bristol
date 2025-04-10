@@ -77,7 +77,10 @@ class WarehouseMonitorService:
         needed_fields: type_hints.NEEDED_FIELDS = None,
     ) -> int:
         # TODO надо проверить, что такие warehouse_id и product_id существуют
-        filtering_data = {"warehouse_id": warehouse_id, "data.product_id": product_id}
+        filtering_data = {
+            "data.warehouse_id": warehouse_id,
+            "data.product_id": product_id,
+        }
         remaining_product_info = await self._repo.get_remaining_product_info(
             filtering_data, needed_fields
         )
