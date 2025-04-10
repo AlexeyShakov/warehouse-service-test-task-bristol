@@ -4,12 +4,11 @@ from motor.motor_asyncio import AsyncIOMotorCollection
 from dataclasses import asdict
 
 from src.serializers import to_json
-from src.infrastructure.mongo.db import get_events_collection
+from src.infrastructure.mongo.connection import get_events_collection
 from src.domains import (
     service as warehouse_monitor_service,
     exceptions as domain_exceptions,
 )
-
 
 movements_routes = APIRouter(prefix="/movements", tags=["Movements"])
 
@@ -33,6 +32,7 @@ async def get_movement_info(
         "data.warehouse_id": 1,
         "data.timestamp": 1,
         "data.quantity": 1,
+        "data.event": 1,
     }
     sorting = (("data.timestamp", 1),)
     try:

@@ -2,6 +2,8 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional, Literal
 
+MOVEMENT_EVENTS = Literal["departure", "arrival"]
+
 
 @dataclass(frozen=True)
 class MovementObj:
@@ -10,6 +12,7 @@ class MovementObj:
     warehouse_id: str
     timestamp: datetime
     quantity: int
+    event: MOVEMENT_EVENTS
 
 
 @dataclass(frozen=True)
@@ -30,5 +33,5 @@ class MovementDiffInfo:
 
 @dataclass(frozen=True)
 class RemainingProduct:
-    event: Literal["departure", "arrival"]
+    event: MOVEMENT_EVENTS
     quantity: int

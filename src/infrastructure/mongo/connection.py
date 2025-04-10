@@ -78,5 +78,6 @@ async def close_connection() -> None:
 
 async def get_events_collection() -> motor.motor_asyncio.AsyncIOMotorCollection:
     return _MONGO_DB_CLIENT.get_collection(
-        db_name=SETTINGS.mongo_db_name, collection_name="events"
+        db_name=SETTINGS.mongo_db_name,
+        collection_name="events",  # TODO нужно добавить в .env
     )

@@ -1,20 +1,20 @@
 from pydantic import BaseModel
 from typing import Literal
-from uuid import UUID
 from datetime import datetime
+from src.domains import models
 
 
 class WarehouseEventData(BaseModel):
-    movement_id: UUID
-    warehouse_id: UUID
+    movement_id: str
+    warehouse_id: str
     timestamp: datetime
-    event: Literal["arrival", "departure"]
-    product_id: UUID
+    event: models.MOVEMENT_EVENTS
+    product_id: str
     quantity: int
 
 
 class WarehouseEvent(BaseModel):
-    id: UUID
+    id: str
     source: str
     specversion: str
     type: Literal["ru.retail.warehouses.movement"]

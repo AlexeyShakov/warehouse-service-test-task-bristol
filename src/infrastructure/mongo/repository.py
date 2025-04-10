@@ -1,6 +1,9 @@
+from typing import Any
+
 from motor.motor_asyncio import AsyncIOMotorCollection
 from src.infrastructure.mongo import type_hints
 from src.domains import models, interfaces
+from src.serializers import from_kafka_pydantic
 
 
 class MongoRepo(interfaces.IWarehouseMonitorRepo):
@@ -36,19 +39,19 @@ class MongoRepo(interfaces.IWarehouseMonitorRepo):
                 warehouse_id=data["warehouse_id"],
                 timestamp=data["timestamp"],  # make it timezone-aware
                 quantity=data["quantity"],
+                event=data["event"],
             )
             movements.append(movement)
         return movements
 
     async def get_remaining_product_info(
         self,
-        filtering_data: dict[str, str],
+        filtering_data: dict[str, Any],
         needed_fields: type_hints.NEEDED_FIELDS = None,
     ) -> list[models.RemainingProduct]:
         query = filtering_data or {}
 
         cursor = self._collection.find(query, projection=needed_fields or None)
-
         results: type_hints.REMAINING_PRODUCT_FROM_MONGO_LIST = await cursor.to_list(
             length=None
         )
@@ -63,3 +66,8 @@ class MongoRepo(interfaces.IWarehouseMonitorRepo):
             )
             for product in remaining_products
         ]
+
+    async def add_product_movement_event(
+        self, product_movement_message: from_kafka_pydantic.WarehouseEvent
+    ) -> None:
+        await self._collection.insert_one(product_movement_message.dict())

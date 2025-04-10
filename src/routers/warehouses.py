@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from motor.motor_asyncio import AsyncIOMotorCollection
 
 from src.serializers import to_json
-from src.infrastructure.mongo.db import get_events_collection
+from src.infrastructure.mongo.connection import get_events_collection
 from src.domains import (
     service as warehouse_monitor_service,
     exceptions as domain_exceptions,

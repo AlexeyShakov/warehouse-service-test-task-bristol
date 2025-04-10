@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import List, TypedDict, Optional, Literal, Sequence, Any
 from bson import ObjectId
+from src.domains import models
 
 
 class MovementDataDict(TypedDict):
@@ -8,6 +9,7 @@ class MovementDataDict(TypedDict):
     warehouse_id: str
     timestamp: datetime
     quantity: int
+    event: models.MOVEMENT_EVENTS
 
 
 class MongoMovementDocument(TypedDict):
@@ -24,7 +26,7 @@ FILTERING_DATA = Optional[dict[str, Any]]
 
 
 class PartialMovementData(TypedDict):
-    event: Literal["arrival", "departure"]
+    event: models.MOVEMENT_EVENTS
     quantity: int
 
 
