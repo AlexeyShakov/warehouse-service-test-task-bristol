@@ -4,8 +4,8 @@ from motor.motor_asyncio import AsyncIOMotorCollection
 from dataclasses import asdict
 
 from src.serializers import to_json
-from src.infrastructure.db import get_events_collection
-from src import service as warehouse_monitor_service
+from src.infrastructure.mongo.db import get_events_collection
+from src.domains import service as warehouse_monitor_service
 
 
 movements_routes = APIRouter(prefix="/movements", tags=["Movements"])

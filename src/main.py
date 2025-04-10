@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 import asyncio
 
 from src.routers import warehouse_routes, movements_routes
-from src.infrastructure.db import get_db_connection, close_connection
+from src.infrastructure.mongo.db import get_db_connection, close_connection
 
 
 @asynccontextmanager

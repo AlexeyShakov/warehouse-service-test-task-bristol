@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends
 from motor.motor_asyncio import AsyncIOMotorCollection
 
 from src.serializers import to_json
-from src.infrastructure.db import get_events_collection
-from src import service as warehouse_monitor_service
+from src.infrastructure.mongo.db import get_events_collection
+from src.domains import service as warehouse_monitor_service
 
 warehouse_routes = APIRouter(prefix="/warehouses", tags=["Warehouses"])
 

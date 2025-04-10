@@ -1,5 +1,6 @@
 from motor.motor_asyncio import AsyncIOMotorCollection
-from src import type_hints, interfaces, models
+from src.infrastructure.mongo import type_hints
+from src.domains import models, interfaces
 
 
 class MongoRepo(interfaces.IWarehouseMonitorRepo):

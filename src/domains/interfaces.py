@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from src import models, type_hints
+from src.infrastructure.mongo import type_hints
+from src.domains import models
 
 
 class IWarehouseMonitorRepo(ABC):
