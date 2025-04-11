@@ -172,3 +172,7 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+todo.txt
+commands.txt
+logs
+warehouse_events.json

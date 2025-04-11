@@ -1,0 +1,49 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pyc
+
+# Virtual environments
+.venv/
+env/
+venv/
+
+# Poetry files not needed in image
+poetry.lock  # Optional, include if you always want fresh deps
+
+# Git
+.git/
+.gitignore
+
+# IDE/editor files
+.idea/
+.vscode/
+*.swp
+
+# OS/FS trash
+.DS_Store
+Thumbs.db
+
+# Docker stuff
+Dockerfile
+.dockerignore
+
+# Logs
+*.log
+
+# Env & config
+.env
+*.env
+
+# Test artifacts
+.coverage
+htmlcov/
+*.pytest_cache/
+.tox/
+dist/
+build/
+commands.txt
+.pre-commit-config.yaml
+todo.txt
