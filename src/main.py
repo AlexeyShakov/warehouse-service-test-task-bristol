@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 import asyncio
 
@@ -34,3 +35,8 @@ app = FastAPI(lifespan=lifespan)
 
 app.include_router(warehouse_routes)
 app.include_router(movements_routes)
+
+
+@app.get("/health", tags=["Health"])
+async def health_check():
+    return JSONResponse(content={"status": "ok"})

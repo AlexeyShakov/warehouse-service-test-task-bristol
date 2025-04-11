@@ -175,3 +175,4 @@ cython_debug/
 todo.txt
 commands.txt
 logs
+warehouse_events.json
