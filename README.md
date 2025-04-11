@@ -123,6 +123,7 @@ URL: /api/warehouses/<warehouse_id>/products/<product_id>
 | Dev-инструменты  | Poetry, Ruff, MyPy, pre-commit |
 | Контейнеризация  | Docker + docker-compose        |
 | Кэширование      | redis  + fastapi-cache2        |
+| сli команды      | typer                          |
 
 
 ## API
@@ -151,6 +152,23 @@ Swagger-документация доступна по адресу `http://127.
 - Poetry управляет зависимостями и виртуальным окружением
 - В `.env` вынесены все чувствительные параметры (пароли, URI и т.д.)
 
+## Заполнение БД
+
+### Описание
+Для автоматическго заполнения БД можно воспользоваться cli-командой. В директории src/utils/data лежит файл
+test_warehouse_events.json. Это тестовый набор данных. Для того, чтобы загрузить свой набор данных, нужно положить в эту
+директорию файл warehouse_events.json с нужными данными. Пайплайн команды:
+
+1. Читается файл.
+2. Kafka producer кладет данные в броке
+3. Консьюмер получает данные
+4. Данные проходят через все проверки и попадают в БД, если они валидные
+5. Можно проверить, что все работает, воспользовавшись API http://127.0.0.1/docs
+
+### Запуск команды
+
+```docker exec -it warehouse_api poetry run warehouse-cli```
+
 ## Кэширование(опционально)
 В проект добавлена поддержка кэширования через Redis с использованием библиотеки fastapi-cache2.
 Это позволяет ускорить ответы от API на часто запрашиваемые ресурсы (например, информацию о состоянии склада).
@@ -168,20 +186,21 @@ git clone https://github.com/AlexeyShakov/warehouse-service-test-task-bristol.gi
 ```
 2. В корень проекта нужно добавить файл .env и заполнить его нужными данными. На данный момент нужны следующие переменные
 
-| Переменная                   | Назначение |
-|------------------------------|------------|
-| `DB_PORT`                    | Порт MongoDB по умолчанию — `27017` |
-| `MONGO_INITDB_ROOT_USERNAME` | Имя пользователя для MongoDB |
-| `MONGO_INITDB_ROOT_PASSWORD` | Пароль пользователя MongoDB |
-| `MONGO_HOST`                 | Хост MongoDB (в docker-compose — это `warehouse_state_db`) |
-| `MONGO_DB_NAME`              | Название базы данных MongoDB, по умолчанию — `warehouse` |
-| `KAFKA_CLUSTER_ID`           | Идентификатор Kafka-кластера |
-| `CLUSTER_ID`                 | Дублирует `KAFKA_CLUSTER_ID` |
-| `KAFKA_HOST`                 | Хост Kafka-брокера (в docker-compose — это `kafka`) |
-| `KAFKA_TOPIC`                | Название Kafka-топика, из которого читаются события |
-| `REDIS HOST`                 |  Хост Redis-сервера (обычно redis в docker-compose) |
-| `REDIS PORT`                 |  Порт Redis (по умолчанию 6379)         |
-| `TTL`                        |  Время жизни кэшированных данных в секундах (например, 300)|
+| Переменная                 | Назначение                                                 |
+|----------------------------|------------------------------------------------------------|
+| `DB_PORT`                  | Порт MongoDB по умолчанию — `27017`                        |
+| `MONGO_INITDB_ROOT_USERNAME` | Имя пользователя для MongoDB                               |
+| `MONGO_INITDB_ROOT_PASSWORD` | Пароль пользователя MongoDB                                |
+| `MONGO_HOST`               | Хост MongoDB (в docker-compose — это `warehouse_state_db`) |
+| `MONGO_DB_NAME`            | Название базы данных MongoDB, по умолчанию — `warehouse`   |
+| `KAFKA_CLUSTER_ID`         | Идентификатор Kafka-кластера                               |
+| `CLUSTER_ID`               | Дублирует `KAFKA_CLUSTER_ID`                               |
+| `KAFKA_HOST`               | Хост Kafka-брокера (в docker-compose — это `kafka`)        |
+| `KAFKA_TOPIC`              | Название Kafka-топика, из которого читаются события        |
+| `REDIS HOST`               | Хост Redis-сервера (обычно redis в docker-compose)         |
+| `REDIS PORT`               | Порт Redis (по умолчанию 6379)                             |
+| `TTL`                      | Время жизни кэшированных данных в секундах (например, 300) |
+| `MAX_CONCURRENT_SENDS`     | Количество задач, запускаемых конкуретно для заполнения БД |
 
 3. Запуск приложение
 

@@ -19,6 +19,8 @@ class GeneralApplicationSettings(BaseSettings):
     redis_port: str
     ttl: int = 86400  # в секундах
 
+    max_concurrent_sends: int
+
 
 SETTINGS = GeneralApplicationSettings()
 
