@@ -20,6 +20,7 @@ aiokafka = ">=0.12.0,<0.13.0"
 fastapi-cache2 = "^0.2.2"
 redis = "^5.2.1"
 typer = { extras = ["all"], version = "^0.15.2" }
+prometheus-fastapi-instrumentator = "^7.1.0"
 
 [tool.poetry.scripts]
 warehouse-cli = "src.cli:app"

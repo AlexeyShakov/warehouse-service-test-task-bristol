@@ -12,12 +12,17 @@ from src.infrastructure.kafka import connection, consume
 
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
+from prometheus_fastapi_instrumentator import Instrumentator
 
 
-async def _init_cache():
+async def _init_cache() -> None:
     FastAPICache.init(
         RedisBackend(redis_connection.REDIS_CLIENT), prefix="fastapi-cache"
     )
+
+
+def _init_monitoring_system(application: FastAPI) -> None:
+    Instrumentator().instrument(application).expose(application)
 
 
 @asynccontextmanager
@@ -43,7 +48,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
-
+_init_monitoring_system(app)
 app.include_router(warehouse_routes)
 app.include_router(movements_routes)
 
