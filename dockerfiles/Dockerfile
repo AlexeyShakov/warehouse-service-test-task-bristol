@@ -11,10 +11,11 @@ WORKDIR /app
 
 COPY pyproject.toml poetry.lock ./
 
-RUN poetry config virtualenvs.create false && poetry lock --no-update && poetry install
+RUN poetry config virtualenvs.create false && \
+    poetry install --with dev
 
 COPY . .
 
 EXPOSE 8000
 
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["poetry", "run", "uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]

@@ -6,8 +6,23 @@ import asyncio
 from src.infrastructure.kafka.connection import init_kafka_producer
 from src.routers import warehouse_routes, movements_routes
 from src.infrastructure.mongo.connection import get_db_connection, close_connection
+from src.infrastructure.redis import connection as redis_connection
 from src.infrastructure import logger
 from src.infrastructure.kafka import connection, consume
+
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.redis import RedisBackend
+from prometheus_fastapi_instrumentator import Instrumentator
+
+
+async def _init_cache() -> None:
+    FastAPICache.init(
+        RedisBackend(redis_connection.REDIS_CLIENT), prefix="fastapi-cache"
+    )
+
+
+def _init_monitoring_system(application: FastAPI) -> None:
+    Instrumentator().instrument(application).expose(application)
 
 
 @asynccontextmanager
@@ -16,6 +31,7 @@ async def lifespan(app: FastAPI):
         await get_db_connection()
         logger.LOGGER.info("Подключение к БД установлено")
         await init_kafka_producer()
+        await _init_cache()
 
         app.state.consumer_task = asyncio.create_task(consume.consume_messages())
         yield
@@ -32,7 +48,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
-
+_init_monitoring_system(app)
 app.include_router(warehouse_routes)
 app.include_router(movements_routes)
 

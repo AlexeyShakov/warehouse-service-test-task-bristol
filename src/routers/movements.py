@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from motor.motor_asyncio import AsyncIOMotorCollection
 from pydantic import BaseModel
-
+from fastapi_cache.decorator import cache
 from dataclasses import asdict
 
 from src.infrastructure import logger
@@ -11,7 +11,9 @@ from src.domains import (
     service as warehouse_monitor_service,
     exceptions as domain_exceptions,
 )
+from src.config import get_project_settings
 
+SETTINGS = get_project_settings()
 movements_routes = APIRouter(prefix="/movements", tags=["Movements"])
 
 
@@ -28,6 +30,7 @@ class ErrorResponse(BaseModel):
         500: {"model": ErrorResponse, "description": "Unknown server error"},
     },
 )
+@cache(expire=SETTINGS.ttl)
 async def get_movement_info(
     movement_id: str,
     events_collection: AsyncIOMotorCollection = Depends(get_events_collection),

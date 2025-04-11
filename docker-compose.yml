@@ -1,37 +1,26 @@
 services:
-  nginx:
-    image: nginx:stable
-    container_name: nginx
-    ports:
-      - "80:80"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-    depends_on:
-      - app
-
   app:
     container_name: warehouse_api
     build:
       context: .
       dockerfile: ./dockerfiles/Dockerfile
-    ports:
-      - "8000:8000"
     depends_on:
       kafka:
         condition: service_healthy
       warehouse_state_db:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 10s
     env_file:
       - .env
     volumes:
       - .:/app
-    command: uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
+    command: poetry run uvicorn src.main:app --host 0.0.0.0 --port 8000
 
   warehouse_state_db:
     container_name: warehouse_state_db
@@ -46,26 +35,23 @@ services:
       - mongo_data:/data/db
     healthcheck:
       test: [
-      "CMD-SHELL",
-      "echo 'db.runCommand({ ping: 1 })' | mongosh -u $MONGO_INITDB_ROOT_USERNAME -p $MONGO_INITDB_ROOT_PASSWORD --authenticationDatabase=admin admin || exit 1"
-    ]
+        "CMD-SHELL",
+        "echo 'db.runCommand({ ping: 1 })' | mongosh -u $MONGO_INITDB_ROOT_USERNAME -p $MONGO_INITDB_ROOT_PASSWORD --authenticationDatabase=admin admin || exit 1"
+      ]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 5s
-    mem_limit: 512m  # Чисто для примера, нужно подстраивать под нужды
-    cpus: 0.7        # Чисто для примера, нужно подстраивать под нужды
 
   kafka:
     container_name: kafka
     image: confluentinc/cp-kafka:7.5.0
     restart: on-failure
+    env_file:
+      - .env
     environment:
       CLUSTER_ID: ${CLUSTER_ID}
       KAFKA_CLUSTER_ID: ${CLUSTER_ID}
       KAFKA_KRAFT_BROKER_ID: 1
-    env_file:
-      - .env
     volumes:
       - kafka_data:/var/lib/kafka/data
       - ./kafka_settings/scripts:/scripts
@@ -76,10 +62,70 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 10s
-    mem_limit: 1g
-    cpus: 1.0
+
+  redis:
+    image: redis:7
+    container_name: redis
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: on-failure
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+
+  redis_exporter:
+    image: oliver006/redis_exporter
+    container_name: redis_exporter
+    environment:
+      REDIS_ADDR: "redis://redis:6379"
+    depends_on:
+      - redis
+
+  mongodb_exporter:
+    image: percona/mongodb_exporter:0.40
+    container_name: mongodb_exporter
+    environment:
+      MONGODB_URI: ${MONGODB_URI}
+    depends_on:
+      - warehouse_state_db
+
+  kafka_exporter:
+    image: danielqsj/kafka-exporter
+    container_name: kafka_exporter
+    environment:
+      KAFKA_SERVER: kafka:9092
+    depends_on:
+      - kafka
+
+  nginx:
+    image: nginx:stable
+    container_name: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - app
+      - prometheus
+      - grafana
 
 volumes:
   mongo_data:
   kafka_data:
+  grafana_data:
