@@ -1,5 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from motor.motor_asyncio import AsyncIOMotorCollection
+from fastapi_cache.decorator import cache
+from src.config import get_project_settings
 
 from src.serializers import to_json
 from src.infrastructure.mongo.connection import get_events_collection
@@ -10,6 +12,7 @@ from src.domains import (
 )
 from pydantic import BaseModel
 
+SETTINGS = get_project_settings()
 warehouse_routes = APIRouter(prefix="/warehouses", tags=["Warehouses"])
 
 
@@ -29,6 +32,7 @@ class ErrorResponse(BaseModel):
         500: {"model": ErrorResponse, "description": "Unknown server error"},
     },
 )
+@cache(expire=SETTINGS.ttl)
 async def get_product_info(
     warehouse_id: str,
     product_id: str,

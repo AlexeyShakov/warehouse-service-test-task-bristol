@@ -15,6 +15,10 @@ class GeneralApplicationSettings(BaseSettings):
     kafka_host: str
     kafka_topic: str
 
+    redis_host: str
+    redis_port: str
+    ttl: int = 86400  # в секундах
+
 
 SETTINGS = GeneralApplicationSettings()
 

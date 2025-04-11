@@ -112,16 +112,17 @@ URL: /api/warehouses/<warehouse_id>/products/<product_id>
 
 ## Стек технологий
 
-| Компонент        | Используемое решение            |
-|------------------|---------------------------------|
-| Язык             | Python 3.11                     |
-| Web Framework    | FastAPI                         |
-| Kafka Client     | aiokafka (асинхронный)          |
-| БД               | MongoDB (через `motor`)         |
-| Валидация данных | Pydantic                        |
-| Тестирование     | pytest (опционально)            |
-| Dev-инструменты  | Poetry, Ruff, MyPy, pre-commit  |
-| Контейнеризация  | Docker + docker-compose         |
+| Компонент        | Используемое решение           |
+|------------------|--------------------------------|
+| Язык             | Python 3.11                    |
+| Web Framework    | FastAPI                        |
+| Kafka Client     | aiokafka (асинхронный)         |
+| БД               | MongoDB (через `motor`)        |
+| Валидация данных | Pydantic                       |
+| Тестирование     | pytest (опционально)           |
+| Dev-инструменты  | Poetry, Ruff, MyPy, pre-commit |
+| Контейнеризация  | Docker + docker-compose        |
+| Кэширование      | redis  + fastapi-cache2        |
 
 
 ## API
@@ -131,7 +132,7 @@ REST API реализован в `routers/movements.py` и `routers/warehouses.p
 - `GET /api/movements/{movement_id}` — получить детали перемещения
 - `GET /api/warehouses/{warehouse_id}/products/{product_id}` — текущее количество товара на складе
 
-Swagger-документация доступна по адресу `/docs`.
+Swagger-документация доступна по адресу `http://127.0.0.1/docs`.
 
 ## Docker
 
@@ -150,6 +151,15 @@ Swagger-документация доступна по адресу `/docs`.
 - Poetry управляет зависимостями и виртуальным окружением
 - В `.env` вынесены все чувствительные параметры (пароли, URI и т.д.)
 
+## Кэширование(опционально)
+В проект добавлена поддержка кэширования через Redis с использованием библиотеки fastapi-cache2.
+Это позволяет ускорить ответы от API на часто запрашиваемые ресурсы (например, информацию о состоянии склада).
+
+Как это работает:
+* Redis-клиент инициализируется при старте приложения в lifespan.
+
+* кэш применяется к эндпоинтам с помощью декоратора @cache:
+
 ## Запуск приложения
 
 1. Для начала нужно склонировать приложение с помощью команды:
@@ -158,17 +168,20 @@ git clone https://github.com/AlexeyShakov/warehouse-service-test-task-bristol.gi
 ```
 2. В корень проекта нужно добавить файл .env и заполнить его нужными данными. На данный момент нужны следующие переменные
 
-| Переменная                          | Назначение |
-|------------------------------------|------------|
-| `DB_PORT`                          | Порт MongoDB по умолчанию — `27017` |
-| `MONGO_INITDB_ROOT_USERNAME`       | Имя пользователя для MongoDB |
-| `MONGO_INITDB_ROOT_PASSWORD`       | Пароль пользователя MongoDB |
-| `MONGO_HOST`                       | Хост MongoDB (в docker-compose — это `warehouse_state_db`) |
-| `MONGO_DB_NAME`                    | Название базы данных MongoDB, по умолчанию — `warehouse` |
-| `KAFKA_CLUSTER_ID`                 | Идентификатор Kafka-кластера |
-| `CLUSTER_ID`                       | Дублирует `KAFKA_CLUSTER_ID` |
-| `KAFKA_HOST`                       | Хост Kafka-брокера (в docker-compose — это `kafka`) |
-| `KAFKA_TOPIC`                      | Название Kafka-топика, из которого читаются события |
+| Переменная                   | Назначение |
+|------------------------------|------------|
+| `DB_PORT`                    | Порт MongoDB по умолчанию — `27017` |
+| `MONGO_INITDB_ROOT_USERNAME` | Имя пользователя для MongoDB |
+| `MONGO_INITDB_ROOT_PASSWORD` | Пароль пользователя MongoDB |
+| `MONGO_HOST`                 | Хост MongoDB (в docker-compose — это `warehouse_state_db`) |
+| `MONGO_DB_NAME`              | Название базы данных MongoDB, по умолчанию — `warehouse` |
+| `KAFKA_CLUSTER_ID`           | Идентификатор Kafka-кластера |
+| `CLUSTER_ID`                 | Дублирует `KAFKA_CLUSTER_ID` |
+| `KAFKA_HOST`                 | Хост Kafka-брокера (в docker-compose — это `kafka`) |
+| `KAFKA_TOPIC`                | Название Kafka-топика, из которого читаются события |
+| `REDIS HOST`                 |  Хост Redis-сервера (обычно redis в docker-compose) |
+| `REDIS PORT`                 |  Порт Redis (по умолчанию 6379)         |
+| `TTL`                        |  Время жизни кэшированных данных в секундах (например, 300)|
 
 3. Запуск приложение
 
