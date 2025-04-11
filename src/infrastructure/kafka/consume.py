@@ -5,6 +5,18 @@ from src.domains import (
     service as warehouse_monitor_service,
 )
 from src.infrastructure import logger
+from src.infrastructure.kafka import connection
+import json
+
+
+async def consume_messages():
+    await connection.init_kafka_consumer()
+    try:
+        async for msg in connection.CONSUMER:
+            payload = json.loads(msg.value.decode("utf-8"))
+            await process_kafka_message(payload)
+    except Exception as e:
+        logger.LOGGER.exception(f"Unknown error when consuming from kafka: {e}")
 
 
 async def process_kafka_message(product_movement_message: dict) -> None:

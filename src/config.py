@@ -12,6 +12,9 @@ class GeneralApplicationSettings(BaseSettings):
     mongo_host: str
     mongo_db_name: str
 
+    kafka_host: str
+    kafka_topic: str
+
 
 SETTINGS = GeneralApplicationSettings()
 
